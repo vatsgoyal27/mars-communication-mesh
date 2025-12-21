@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap");
 
@@ -91,7 +92,7 @@
       <div>
         <h1 class="header-font text-3xl font-black tracking-[0.2em] text-white">
           MARS<span class="text-green-500">_UPLINK</span
-          ><span class="text-xs align-top ml-2 opacity-50">V 2.0.4</span>
+          ><span class="text-xs align-top ml-2 opacity-50"></span>
         </h1>
         <div class="flex items-center gap-4 mt-2">
           <div class="flex items-center gap-2">
@@ -106,7 +107,7 @@
             >
           </div>
           <span class="text-[10px] opacity-40"
-            >COORDINATES: 18.65°N 226.2°E</span
+            ></span
           >
         </div>
       </div>
@@ -135,7 +136,7 @@
           <h3
             class="header-font text-[10px] font-bold text-green-400 tracking-widest mb-2 border-b border-green-900/30 pb-1"
           >
-            ROVER_ORIENTATION (3D_IMU)
+            CUBESAT_ORIENTATION (3D_IMU)
           </h3>
           <div id="imu-canvas-container" class="h-[calc(100%-40px)]"></div>
           <div
@@ -232,9 +233,9 @@
       // Chart Styling Helper
 
       // --- THREE.JS ORIENTATION LOGIC ---
+      // --- THREE.JS UPDATED FOR 3D MODEL ---
       const container = document.getElementById("imu-canvas-container");
       const scene = new THREE.Scene();
-      const camera = new THREE.Camera(); // Static camera for simplified view
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
@@ -242,34 +243,61 @@
       renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(renderer.domElement);
 
-      // Create the "Slab" from the video
-      const geometry = new THREE.BoxGeometry(2, 0.2, 1);
-      const material = new THREE.MeshPhongMaterial({
-        color: 0xff3e3e,
-        shininess: 100,
-      });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-
-      // Add coordinate axes (Red: X, Green: Y, Blue: Z)
-      const axesHelper = new THREE.AxesHelper(2);
-      scene.add(axesHelper);
-
-      // Lighting
-      const light = new THREE.DirectionalLight(0xffffff, 1);
+      // Lighting (Boosted for a complex model)
+      const light = new THREE.DirectionalLight(0xffffff, 1.5);
       light.position.set(1, 1, 1).normalize();
       scene.add(light);
-      scene.add(new THREE.AmbientLight(0x404040));
+      scene.add(new THREE.AmbientLight(0x404040, 2));
 
-      camera.position.z = 5;
       const perspectiveCamera = new THREE.PerspectiveCamera(
         45,
         container.clientWidth / container.clientHeight,
         0.1,
         1000
       );
-      perspectiveCamera.position.set(3, 3, 3);
+      perspectiveCamera.position.set(4, 4, 4);
       perspectiveCamera.lookAt(0, 0, 0);
+
+      let roverModel; // This replaces 'cube'
+
+      // Load your converted GLB file
+      const loader = new THREE.GLTFLoader();
+ loader.load(
+  "cubsat.glb",
+  (gltf) => {
+    roverModel = gltf.scene;
+
+    // 1. Calculate the current bounding box
+    const box = new THREE.Box3().setFromObject(roverModel);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+
+    // 2. Shift the model's internal geometry so it pivots around the center
+    // We subtract the center coordinates from the model's position
+    roverModel.position.x = -center.x;
+    roverModel.position.y = -center.y;
+    roverModel.position.z = -center.z;
+
+    // 3. Create a "Pivot Group" to hold the shifted model
+    // This group becomes the new reference point for rotations
+    const pivotGroup = new THREE.Group();
+    scene.add(pivotGroup);
+    pivotGroup.add(roverModel);
+
+    // 4. Important: Re-assign roverModel to the group 
+    // This ensures your MQTT rotation logic rotates the center-point
+    roverModel = pivotGroup;
+
+    // 5. Auto-Scale: Adjust the number (e.g., 3.0) to fill the panel better
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scaleFactor = 3 / maxDim; 
+    roverModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    console.log("Model successfully centered on pivot point.");
+  },
+  undefined,
+  (error) => console.error("Load Error:", error)
+);
 
       function animate() {
         requestAnimationFrame(animate);
@@ -355,12 +383,12 @@
 
           // Update 3D Rotation (Convert degrees to radians)
           // Note: MPU6050 axes might need swapping depending on mounting
-          if (data.pitch !== undefined) {
+          if (data.pitch !== undefined && roverModel) {
             const p = THREE.MathUtils.degToRad(data.pitch);
             const r = THREE.MathUtils.degToRad(data.roll);
             const y = THREE.MathUtils.degToRad(data.yaw);
 
-            cube.rotation.set(p, y, r); // Order depends on rover orientation
+            roverModel.rotation.set(p, y, r); // Order depends on rover orientation
 
             document.getElementById("val-pitch").innerText = Math.round(
               data.pitch
