@@ -338,3 +338,24 @@ footer {
     gap: 1rem;
   }
 }
+
+/* ================================
+   INFOGRAPHIC IMAGE SCALING
+   ================================ */
+
+.infographic {
+  max-width: 900px;      /* Controls overall size */
+  margin: 3rem auto;     /* Centers horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* Centers image & caption */
+}
+
+.infographic img {
+  width: 100%;           /* Scales relative to container */
+  max-width: 800px;      /* Uniform max image width */
+  height: auto;          /* Keeps aspect ratio */
+  object-fit: contain;   /* Prevents cropping */
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.7);
+}
