@@ -12,7 +12,7 @@
 <section class="hero">
   <div class="hero-content">
     <h1>Mars Communication Mesh</h1>
-    <p>Rapid, Sustainable Communication for Future Mars Exploration</p>
+    <p>Rapid, Scalable Communication Infrastructure for Future Mars Exploration</p>
     <div class="hero-tags">
       <span>CubeSat</span>
       <span>Mesh Network</span>
@@ -36,9 +36,11 @@
   <h2>Executive Summary</h2>
   <p>
     This project introduces a <strong>modular, low-power communication mesh</strong>
-    designed for sustainable Mars travel. Using a <strong>1U CubeSat</strong> and a
-    <strong>ground-based emergency beacon</strong>, the system enables fast deployment
-    of communication links between stations, rovers, and astronauts.
+  designed for sustainable Mars exploration. Using a <strong>1U CubeSat node</strong>
+  and a <strong>ground-based emergency beacon</strong>, the system enables rapid
+  deployment of reliable communication links between stations, rovers, and crewed
+  habitats in harsh and infrastructure-limited environments.
+
   </p>
 </section>
 
@@ -46,9 +48,10 @@
 <section id="problem" class="section dark">
   <h2>The Problem</h2>
   <div class="cards">
-    <div class="card">Harsh Martian environment</div>
-    <div class="card">Difficult infrastructure deployment</div>
-    <div class="card">Need for emergency-ready communication</div>
+    <div class="card">Extreme dust, terrain, and line-of-sight limitations</div>
+    <div class="card">Delayed or impractical fixed infrastructure deployment</div>
+    <div class="card">High risk during emergencies and system failures</div>
+    <div class="card">Lack of effective connectivity between settements</div>
   </div>
 </section>
 
@@ -68,8 +71,7 @@
     <div class="timeline-item">
       <h3>Wireless Mesh</h3>
       <p>
-        Low-power Zigbee mesh enables scalable communication
-        between multiple nodes.
+        Low-power Zigbee-based mesh enables scalable, fault-tolerant communication
       </p>
     </div>
 
@@ -79,6 +81,7 @@
         Servo-rotated antenna, environmental sensors, emergency beacon functionality.
       </p>
     </div>
+    
   </div>
 </section>
 
@@ -100,7 +103,7 @@
     <div class="card">
       <h3>Base Station</h3>
       <ul>
-        <li>ESP8266</li>
+        <li>ESP8266 (Zigbee)</li>
         <li>2-Axis Servo Rotator</li>
         <li>IR, Vibration, Light, Humidity Sensors</li>
       </ul>
@@ -112,9 +115,10 @@
 <section id="software" class="section">
   <h2>Software Stack</h2>
   <div class="cards">
-    <div class="card">ESP8266 Firmware</div>
-    <div class="card">Wi-Fi Sensor Dashboard</div>
+    <div class="card">Dual ESP8266 Firmware (CubeSat + Base Station)</div>
+    <div class="card">Real-Time Wi-Fi Sensor Dashboard</div>
     <div class="card">Blynk Servo Controller App</div>
+    <div class="card">Automatic alignment system with custom motor river for magnetorquer</div>
   </div>
 </section>
 
@@ -125,12 +129,16 @@
     This system supports <strong>emergency response</strong>,
     <strong>resource coordination</strong>, and even
     <strong>human connection and morale</strong> on Mars —
-    forming a foundation for sustainable extraterrestrial settlements.
+    forming a foundational communication layer for sustainable 
+    extraterrestrial settlements.
   </p>
 </section>
 
 <footer>
-  <p>Hackathon Project • Team Name • Year</p>
+  <p>Hardware Hackathon 2.0 • Team 18 • Mars Communication Mesh
+<br>
+Yog • Shreyas • Vatsal • Sreekar
+</p>
 </footer>
 
 <script src="script.js"></script>
