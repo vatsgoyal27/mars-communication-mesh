@@ -1,20 +1,31 @@
-// Simple scroll reveal (guaranteed to work)
+// ================================
+// SMOOTH PAGE LOAD ANIMATIONS
+// ================================
 
-const revealItems = document.querySelectorAll(
-  ".section, .card, .timeline-item"
-);
+window.addEventListener("load", () => {
 
-function revealOnScroll() {
-  const windowHeight = window.innerHeight;
+  // Fade in sections
+  document.querySelectorAll(".section").forEach((section, index) => {
+    section.style.opacity = "0";
+    section.style.transform = "translateY(40px)";
+    section.style.transition =
+      "opacity 0.8s ease-out, transform 0.8s ease-out";
 
-  revealItems.forEach(item => {
-    const elementTop = item.getBoundingClientRect().top;
-
-    if (elementTop < windowHeight - 100) {
-      item.classList.add("reveal-active");
-    }
+    setTimeout(() => {
+      section.style.opacity = "1";
+      section.style.transform = "translateY(0)";
+    }, index * 120);
   });
-}
 
-window.addEventListener("scroll", revealOnScroll);
-window.addEventListener("load", revealOnScroll);
+  // Enhance card hover depth
+  document.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("mouseenter", () => {
+      card.style.transform = "translateY(-12px) scale(1.02)";
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "translateY(0) scale(1)";
+    });
+  });
+
+});

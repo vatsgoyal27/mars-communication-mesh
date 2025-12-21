@@ -13,7 +13,7 @@
   <div class="hero-content">
     <h1>Mars Communication Mesh</h1>
     <p>Rapid, Scalable Communication Infrastructure for Future Mars Exploration</p>
-    <div class="hero-tags" style="justify-content:center;">
+    <div class="hero-tags">
       <span>CubeSat</span>
       <span>Mesh Network</span>
       <span>Low Power</span>
@@ -23,14 +23,17 @@
 </section>
 
 <!-- NAV -->
-<nav class="navbar" style="justify-content: center;">
+<nav class="navbar">
   <a href="#summary">Overview</a>
   <a href="#problem">Problem</a>
   <a href="#architecture">Architecture</a>
   <a href="#hardware">Hardware</a>
+  <a href="#cad">CAD</a>
+  <a href="#pcb">PCB</a>
   <a href="#software">Software</a>
   <a href="#impact">Impact</a>
 </nav>
+
 
 <!-- SUMMARY -->
 <section id="summary" class="section">
@@ -141,15 +144,6 @@
         <li>PCB-integrated patch antenna</li>
       </ul>
 
-      <!-- PLACEHOLDER: CUBESAT CAD -->
-      <div class="placeholder">
-        <p>[ CubeSat CAD Model / Exploded View ]</p>
-      </div>
-
-      <!-- PLACEHOLDER: CUBESAT PCB -->
-      <div class="placeholder">
-        <p>[ CubeSat PCB Layout and Schematic ]</p>
-      </div>
     </div>
 
     <div class="card">
@@ -161,15 +155,6 @@
         <li>Emergency beacon and alert system</li>
       </ul>
 
-      <!-- PLACEHOLDER: BASE STATION CAD -->
-      <div class="placeholder">
-        <p>[ Base Station CAD Model ]</p>
-      </div>
-
-      <!-- PLACEHOLDER: BASE STATION PCB -->
-      <div class="placeholder">
-        <p>[ Base Station PCB Layout and Schematic ]</p>
-      </div>
     </div>
   </div>
 
@@ -178,6 +163,65 @@
     <p>[ Power Budget Calculations / CoE Space ]</p>
   </div>
 </section>
+
+<!-- CAD DESIGN -->
+<section id="cad" class="section">
+  <h2>Mechanical CAD Design</h2>
+
+  <p>
+    Mechanical structures for the CubeSat and base station were designed using
+    parametric CAD tools to ensure compact form factors, ease of assembly,
+    and compatibility with standard CubeSat dimensions.
+  </p>
+
+  <!-- CubeSat CAD -->
+  <div class="infographic">
+    <img src="images/cubesat-cad.png" alt="CubeSat CAD Model">
+    <p class="caption">
+      Figure 4: Parametric CAD model of the 1U CubeSat showing structural frame,
+      PCB mounting points, and antenna placement.
+    </p>
+  </div>
+
+  <!-- Base Station CAD -->
+  <div class="infographic">
+    <img src="images/base-station-cad.png" alt="Base Station CAD Model">
+    <p class="caption">
+      Figure 5: CAD model of the ground base station highlighting the
+      servo-driven antenna mount and sensor enclosure.
+    </p>
+  </div>
+</section>
+
+<!-- PCB DESIGN -->
+<section id="pcb" class="section dark">
+  <h2>PCB Design & Electronics Integration</h2>
+
+  <p>
+    Custom printed circuit boards were designed to minimize wiring complexity,
+    reduce mass, and improve system reliability. Separate PCBs were developed
+    for power regulation, communication, and control subsystems.
+  </p>
+
+  <!-- CubeSat PCB -->
+  <div class="infographic">
+    <img src="images/cubesat-pcb.png" alt="CubeSat PCB Layout">
+    <p class="caption">
+      Figure 6: CubeSat PCB layout and schematic showing integrated ESP8266,
+      Zigbee radio, power regulation, and IMU interfaces.
+    </p>
+  </div>
+
+  <!-- Base Station PCB -->
+  <div class="infographic">
+    <img src="images/base-station-pcb.png" alt="Base Station PCB Layout">
+    <p class="caption">
+      Figure 7: Base station PCB design supporting sensor inputs,
+      servo control, and emergency beacon circuitry.
+    </p>
+  </div>
+</section>
+
 
 <!-- SOFTWARE -->
 <section id="software" class="section">
