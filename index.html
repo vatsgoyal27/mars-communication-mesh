@@ -30,6 +30,7 @@
   <a href="#hardware">Hardware</a>
   <a href="#cad">CAD</a>
   <a href="#pcb">PCB</a>
+  <a href="#telemetry">Telemetry</a>
   <a href="#software">Software</a>
   <a href="#impact">Impact</a>
 </nav>
@@ -185,7 +186,7 @@
 
   <!-- Base Station CAD -->
   <div class="infographic">
-    <img src="images/servo2servo.png" alt="Base Station CAD Model">
+    <img src="images/baserot.png" alt="Base Station CAD Model">
     <p class="caption">
       Figure 5: CAD model of the ground base station highlighting the
       servo-driven antenna mount and sensor enclosure.
@@ -254,7 +255,175 @@
   </div>
 
 </section>
+<!-- TELEMETRY -->
+<section id="telemetry" class="section">
+  <h2>Telemetry & Communication Analysis</h2>
 
+  <p>
+    Reliable telemetry is essential for sustaining communication between CubeSat
+    relay nodes, surface base stations, and mobile assets. The system utilizes a
+    <strong>PCB-integrated microstrip patch antenna</strong> designed to provide
+    directional radiation, compact form factor, and efficient power utilization.
+  </p>
+
+  <!-- ================================
+       PATCH ANTENNA THEORY
+       ================================ -->
+
+  <h3>Patch Antenna Design & Theory</h3>
+
+  <p>
+    A microstrip patch antenna consists of a conductive radiating patch separated
+    from a ground plane by a dielectric substrate. Radiation occurs due to fringing
+    electric fields at the patch edges when the antenna resonates at its design
+    frequency.
+  </p>
+
+  <p>
+    This antenna type is well suited for CubeSat applications due to its
+    <strong>low profile</strong>, <strong>lightweight structure</strong>, and
+    <strong>direct PCB integration</strong>, eliminating the need for external
+    antenna assemblies.
+  </p>
+
+  <!-- PATCH ANTENNA IMAGE -->
+  <div class="infographic">
+    <img src="images/patch.jpeg" alt="PCB Integrated Patch Antenna">
+    <p class="caption">
+      Figure 11: PCB-integrated microstrip patch antenna designed for the Zigbee
+      communication band, showing radiating patch geometry and ground plane layout.
+    </p>
+  </div>
+
+  <!-- ================================
+       GAIN & DIRECTIVITY
+       ================================ -->
+
+  <h3>Gain & Radiation Characteristics</h3>
+
+  <p>
+    The patch antenna exhibits a <strong>directional radiation pattern</strong>,
+    concentrating transmitted energy normal to the patch surface. This improves
+    link efficiency compared to omnidirectional antennas, particularly in
+    power-limited space systems.
+  </p>
+
+  <p>
+    Antenna gain is achieved through controlled directivity rather than active
+    amplification. The measured gain provides sufficient link margin while
+    maintaining compliance with power and size constraints.
+  </p>
+
+  <!-- GAIN PLOT IMAGE -->
+  <div class="infographic">
+    <img src="images/gainplot.png" alt="Patch Antenna Gain Plot">
+    <p class="caption">
+      Figure 12: Simulated antenna gain and radiation pattern demonstrating
+      directional performance and main-lobe alignment.
+    </p>
+  </div>
+
+  <!-- ================================
+       LINK BUDGET CODE SECTION
+       ================================ -->
+
+    <!-- ================================
+       LINK BUDGET ANALYSIS
+       ================================ -->
+
+  <h3>Link Budget Analysis</h3>
+
+  <p>
+    A detailed link budget analysis was performed to ensure reliable communication
+    between CubeSat relay nodes and surface base stations under worst-case operating
+    conditions. The analysis accounts for transmit power, antenna gains, propagation
+    losses, and receiver sensitivity.
+  </p>
+
+  <!-- LINK BUDGET IMAGE -->
+  <div class="infographic">
+    <img src="images/linkb.jpeg" alt="Link Budget Calculation Diagram">
+    <p class="caption">
+      Figure 13: Link budget diagram summarizing transmit power, antenna gains,
+      free-space path loss, and received signal strength.
+    </p>
+  </div>
+
+  <p>
+    The calculated link margin confirms that the system maintains sufficient signal
+    strength for reliable data transmission, even with conservative assumptions
+    for distance and environmental losses.
+  </p>
+
+  <!-- LINK BUDGET CODE -->
+  <h4>Link Budget Computation Code</h4>
+
+  <p>
+    The following code snippet demonstrates the methodology used to compute received
+    power and link margin for the communication system:
+  </p>
+
+  <pre><code>
+nealinkb.mlx:
+clc; clearvars;
+
+f = 433e6; % frequency in Hertz
+r = 450e3; %altitude (change later, based on elevation angle) in metres
+
+P_t = 15; % includes HPA, Power of the transmitter in dBw
+G_t = 2; % gain of the antenna, in dBi 
+L_txsystem = 0; %losses due to feeding lines, connectors, filters, HPA etc in dB
+L_fspl = 0; %free space path loss (calculation below) in dB
+L_atm = 0; %atmospheric, rain, clouds, fog, ionosphere attenuation + (Diffusion- due to obstacles- neglect) + (Multipath fading- only for terrestrial- neglect) in dB
+L_plrz = 0; %polarization mismatch, effectively 0 for circularly polarised antennas in dB
+L_point = 1.5; % pointing losses, add both reciever and transmitter pointing losses in dB
+
+G_r = 3; % gain of ground station in dBi
+G_lna_ext = 0; %gain of external lna, see below for effect on F in dBi
+L_rxsystem = 1; %losses due to feeding lines, connectors, filters, LNA, demodulators etc in dB
+
+S_datasheet = -135; %sensitivity on datasheet (already includes the internal LNA gain effect an noise spectrum density change) in dBm
+T_ant = 750; %Thermal temperature, Tsky(atmospheric thermal temp) + Tgnd(due to sie and back lobes) in K
+B_datasheet = 125e3; %Bandwidth of reciever in Hz
+SNRrequired_datasheet = -17.5; %required signal to noise ratio for the reciever to be able to demod the signal in dB
+
+U_bitrate = 980e-6; %bitrate that WE pass, megabits per second
+EbNo_threshold = 7.1; %minimum Eb/No required by the reciever, in dB
+
+EIRP = P_t + G_t - L_txsystem %effective output power in dBm
+L_fspl = 20*log10(4*pi*r*f/299792458)
+L_prop = L_fspl + L_atm %propogation losses
+
+Pr = EIRP - L_prop - L_plrz - L_point + G_r + G_lna_ext - L_rxsystem;
+C = Pr %recieved power to digital system at reciever end, in dBm
+
+N = S_datasheet - SNRrequired_datasheet %noise power
+NF = N + 174 - 10*log10(B_datasheet) %noise figure at datasheet
+F = 10^(NF/10) %noise factor at datasheet
+
+% if external lna connected - F = Flna + (Frx - 1)/G_lna_ext;
+
+Tr = (F-1)*290 %Thermal temp at reciever end
+Ts_actual = T_ant + Tr %Thermal temp of system incluing Tatm and Tr (entire system)
+Ts_spec = F*290 %Thermal temp use by mnufacturer to calculate
+correction = 10*log10(Ts_actual/Ts_spec) %change due to Tatm
+
+S_actual = S_datasheet + correction; %actual sensitivity of reciever system
+Psensitivity = S_actual
+
+LINKMARGINP_via_sensitivity = Pr-Psensitivity
+
+No = 1.380649e-23 * Ts_actual; %Noise spectral density in W/Hz
+No = 10*log10(No) %nsd in dBW/Hz
+
+C_ = C - 30; %C in dBW
+CNo = C_ - No %received carrier power/noise spectral density in dB-Hz
+EbNo_calculated = CNo - 10*log10(U_bitrate) -60 %received EbNo in dB
+
+LINKMARGINP_via_ebno = EbNo_calculated-EbNo_threshold
+  </code></pre>
+
+</section>
 
 
 <!-- SOFTWARE -->
