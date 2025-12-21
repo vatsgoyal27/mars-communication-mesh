@@ -359,3 +359,11 @@ footer {
   border-radius: 18px;
   box-shadow: 0 20px 45px rgba(0,0,0,0.7);
 }
+
+/* ================================
+   NO-BORDER INFOGRAPHICS
+   ================================ */
+
+.infographic.no-border img {
+  max-width: 1000px;
+}
