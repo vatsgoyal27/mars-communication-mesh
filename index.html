@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mars Communication Mesh</title>
+  <title>harwarehackathonteam18</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,12 +11,11 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-content">
-    <h1>Mars Communication Mesh</h1>
+    <h1>Cubesat Based Network Mesh</h1>
     <p>Rapid, Scalable Communication Infrastructure for Future Mars Exploration</p>
     <div class="hero-tags">
-      <span>CubeSat</span>
-      <span>Mesh Network</span>
-      <span>Low Power</span>
+      <span>Connectivity</span>
+      <span>Scalability</span>
       <span>Sustainability</span>
     </div>
   </div>
@@ -27,11 +26,10 @@
   <a href="#summary">Overview</a>
   <a href="#problem">Problem</a>
   <a href="#architecture">Architecture</a>
-  <a href="#hardware">Hardware</a>
   <a href="#cad">CAD</a>
   <a href="#pcb">PCB</a>
   <a href="#telemetry">Telemetry</a>
-  <a href="#software">Software</a>
+  <a href="#dashboard">Dashboard</a>
   <a href="#impact">Impact</a>
 </nav>
 
@@ -121,47 +119,6 @@
   <!-- PLACEHOLDER: SYSTEM BLOCK DIAGRAM -->
   <div class="placeholder">
     <p>[ Block Diagram of Overall System Architecture Goes Here ]</p>
-  </div>
-</section>
-
-<!-- HARDWARE -->
-<section id="hardware" class="section dark">
-  <h2>Hardware Design</h2>
-
-  <p>
-    The hardware is optimized for <strong>low power consumption</strong>,
-    <strong>modularity</strong>, and <strong>manufacturability</strong>.
-    Wherever possible, custom PCBs are used to reduce size, mass, and wiring complexity.
-  </p>
-
-  <div class="cards">
-    <div class="card">
-      <h3>CubeSat Hardware</h3>
-      <ul>
-        <li>ESP8266 microcontroller with Zigbee radio</li>
-        <li>Custom-designed power and communication PCBs</li>
-        <li>IMU-based attitude sensing</li>
-        <li>On-PCB magnetorquer for orientation control</li>
-        <li>PCB-integrated patch antenna</li>
-      </ul>
-
-    </div>
-
-    <div class="card">
-      <h3>Base Station Hardware</h3>
-      <ul>
-        <li>ESP8266 microcontroller with Zigbee</li>
-        <li>2-axis servo-driven directional antenna</li>
-        <li>IR, vibration, light, humidity sensors</li>
-        <li>Emergency beacon and alert system</li>
-      </ul>
-
-    </div>
-  </div>
-
-  <!-- PLACEHOLDER: POWER BUDGET / CoE -->
-  <div class="placeholder">
-    <p>[ Power Budget Calculations / CoE Space ]</p>
   </div>
 </section>
 
@@ -426,40 +383,116 @@ LINKMARGINP_via_ebno = EbNo_calculated-EbNo_threshold
 </section>
 
 
-<!-- SOFTWARE -->
-<section id="software" class="section">
-  <h2>Software Stack</h2>
+<!-- DASHBOARD -->
+<section id="dashboard" class="section dark">
+  <h2>Local Telemetry & Control Dashboard</h2>
 
   <p>
-    The software architecture is designed to be lightweight, fault-tolerant,
-    and adaptable. Firmware is split between CubeSat nodes and ground stations,
-    with shared communication protocols.
+    This dashboard provides a real-time mission-control interface for monitoring
+    system health, environmental conditions, and CubeSat orientation on Mars.
+    The visual design emphasizes high contrast and clarity to support rapid
+    decision-making during both nominal operations and emergency events.
   </p>
 
-  <div class="cards">
-    <div class="card">
-      Dual ESP8266 firmware supporting Zigbee mesh routing,
-      node discovery, and fault recovery.
-    </div>
-    <div class="card">
-      Real-time Wi-Fi dashboard for sensor monitoring,
-      node health, and system diagnostics.
-    </div>
-    <div class="card">
-      Blynk-based remote control interface for antenna
-      alignment and emergency overrides.
-    </div>
-    <div class="card">
-      Automatic orientation and alignment logic using IMU feedback
-      and custom magnetorquer motor drivers.
-    </div>
+  <p>
+    Telemetry from the ground station and CubeSat nodes is transmitted to a
+    locally hosted server using the MQTT protocol. The dashboard subscribes to
+    these streams to render orientation data, sensor values, alerts, and
+    communication status with minimal latency.
+  </p>
+
+  <!-- DASHBOARD IMAGE -->
+  <div class="infographic">
+    <img src="images/website.jpeg" alt="Mission Control Telemetry Dashboard">
+    <p class="caption">
+      Figure 8: Mission-control dashboard displaying real-time CubeSat orientation,
+      environmental telemetry, system alerts, and communication status.
+    </p>
   </div>
 
-  <!-- PLACEHOLDER: SOFTWARE FLOWCHART -->
-  <div class="placeholder">
-    <p>[ Firmware Flowchart / Communication Protocol Flow ]</p>
-  </div>
+  <p>
+    A central 3D visualization displays the CubeSat attitude in real time using
+    IMU data from the onboard MPU6050. Orientation updates are streamed at
+    approximately 20 Hz, enabling smooth visualization of pitch, roll, and yaw.
+    The model rotates about its geometric center to maintain a stable reference
+    frame.
+  </p>
+
+  <p>
+    Environmental telemetry from the ground station, including atmospheric
+    temperature and solar luminosity, is updated at 1 Hz and displayed as
+    time-series plots with fixed axis scaling to preserve contextual accuracy.
+  </p>
+
+  <p>
+    Persistent alert panels visually latch when abnormal conditions are detected,
+    including seismic activity and reduced atmospheric clarity due to dust
+    storms. A rolling event log records system messages and emergency signals
+    with timestamps, while uplink indicators confirm active communication with
+    CubeSat relay nodes.
+  </p>
+
+  <!-- CODE / CoE SNIPPETS -->
+  <h3>Dashboard Code & CoE Snippets</h3>
+
+  <p>
+    The following excerpts illustrate core logic used for telemetry transport,
+    orientation processing, and real-time dashboard updates.
+  </p>
+
+  <pre class="code-block"><code>
+// MQTT Telemetry Publisher (ESP8266)
+void publishTelemetry() {
+  StaticJsonDocument<256> data;
+  data["temp"]  = temperature;
+  data["lux"]   = luminosity;
+  data["yaw"]   = imuYaw;
+  data["pitch"] = imuPitch;
+  data["roll"]  = imuRoll;
+
+  char buffer[256];
+  serializeJson(data, buffer);
+  mqttClient.publish("mars/telemetry", buffer);
+}
+</code></pre>
+
+  <p class="code-caption">
+    Firmware logic used by CubeSat and ground station nodes to transmit
+    sensor and IMU telemetry over MQTT.
+  </p>
+
+  <pre class="code-block"><code>
+// IMU Orientation Processing (MPU6050)
+void computeOrientation() {
+  imu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  pitch = atan2(ax, sqrt(ay*ay + az*az)) * RAD_TO_DEG;
+  roll  = atan2(ay, sqrt(ax*ax + az*az)) * RAD_TO_DEG;
+  yaw  += gz * deltaTime;
+}
+</code></pre>
+
+  <p class="code-caption">
+    Orientation estimation routine used to drive CubeSat alignment
+    and 3D visualization on the dashboard.
+  </p>
+
+  <pre class="code-block"><code>
+// Web Dashboard MQTT Client
+client.onMessageArrived = (msg) => {
+  const t = JSON.parse(msg.payloadString);
+  updateCube(t.pitch, t.roll, t.yaw);
+  updateGraphs(t.temp, t.lux);
+};
+</code></pre>
+
+  <p class="code-caption">
+    Browser-side logic for real-time dashboard updates based on
+    incoming MQTT telemetry streams.
+  </p>
 </section>
+
+
+
 
 <!-- IMPACT -->
 <section id="impact" class="section dark">
