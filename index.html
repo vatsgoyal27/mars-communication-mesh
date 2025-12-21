@@ -13,16 +13,17 @@
   <div class="hero-content">
     <h1>Mars Communication Mesh</h1>
     <p>Rapid, Scalable Communication Infrastructure for Future Mars Exploration</p>
-    <div class="hero-tags">
+    <div class="hero-tags" style="justify-content:center;">
       <span>CubeSat</span>
       <span>Mesh Network</span>
+      <span>Low Power</span>
       <span>Sustainability</span>
     </div>
   </div>
 </section>
 
 <!-- NAV -->
-<nav class="navbar">
+<nav class="navbar" style="justify-content: center;">
   <a href="#summary">Overview</a>
   <a href="#problem">Problem</a>
   <a href="#architecture">Architecture</a>
@@ -35,12 +36,20 @@
 <section id="summary" class="section">
   <h2>Executive Summary</h2>
   <p>
-    This project introduces a <strong>modular, low-power communication mesh</strong>
-  designed for sustainable Mars exploration. Using a <strong>1U CubeSat node</strong>
-  and a <strong>ground-based emergency beacon</strong>, the system enables rapid
-  deployment of reliable communication links between stations, rovers, and crewed
-  habitats in harsh and infrastructure-limited environments.
+    This project proposes a <strong>modular, low-power communication mesh</strong>
+    designed for early-stage and long-term Mars exploration missions. The system
+    uses a combination of <strong>1U CubeSat relay nodes</strong> and
+    <strong>ground-based emergency stations</strong> to provide resilient,
+    self-healing communication between astronauts, rovers, and surface habitats.
+  </p>
 
+  <p>
+    Unlike traditional point-to-point or centralized relay systems, this approach
+    emphasizes <strong>distributed redundancy</strong>, allowing communication to
+    persist even when individual nodes fail. The architecture prioritizes
+    <strong>rapid deployment</strong>, <strong>energy efficiency</strong>, and
+    <strong>scalability</strong>, making it suitable for harsh, infrastructure-poor
+    environments such as Mars.
   </p>
 </section>
 
@@ -48,10 +57,22 @@
 <section id="problem" class="section dark">
   <h2>The Problem</h2>
   <div class="cards">
-    <div class="card">Extreme dust, terrain, and line-of-sight limitations</div>
-    <div class="card">Delayed or impractical fixed infrastructure deployment</div>
-    <div class="card">High risk during emergencies and system failures</div>
-    <div class="card">Lack of effective connectivity between settements</div>
+    <div class="card">
+      Mars terrain creates severe <strong>line-of-sight and signal attenuation</strong>
+      challenges due to dust storms, elevation changes, and obstacles.
+    </div>
+    <div class="card">
+      Fixed communication infrastructure is <strong>slow, expensive, and risky</strong>
+      to deploy during early missions.
+    </div>
+    <div class="card">
+      Communication failures during emergencies can result in
+      <strong>loss of life, mission failure, or stranded crews</strong>.
+    </div>
+    <div class="card">
+      There is currently no lightweight, rapidly deployable solution for
+      <strong>inter-settlement connectivity</strong> on Mars.
+    </div>
   </div>
 </section>
 
@@ -59,29 +80,43 @@
 <section id="architecture" class="section">
   <h2>System Architecture</h2>
 
+  <p>
+    The Mars Communication Mesh is composed of three tightly integrated layers:
+    orbital relay nodes, a wireless surface mesh, and intelligent ground stations.
+    Together, these components form a fault-tolerant network capable of adapting
+    to node loss and environmental changes.
+  </p>
+
   <div class="timeline">
     <div class="timeline-item">
-      <h3>1U CubeSat</h3>
+      <h3>1U CubeSat Node</h3>
       <p>
-        ESP8266 + Zigbee, custom PCB, IMU-controlled on-PCB magnetorquer,
-        PCB patch antenna.
+        Acts as an orbital or elevated relay node. Each CubeSat carries an
+        ESP8266-based controller, Zigbee radio, and attitude control hardware
+        for antenna alignment and mesh optimization.
       </p>
     </div>
 
     <div class="timeline-item">
-      <h3>Wireless Mesh</h3>
+      <h3>Wireless Mesh Layer</h3>
       <p>
-        Low-power Zigbee-based mesh enables scalable, fault-tolerant communication
+        A Zigbee-based mesh network enables multi-hop routing, allowing data to
+        dynamically reroute around failed or obstructed nodes without human intervention.
       </p>
     </div>
 
     <div class="timeline-item">
-      <h3>Base Station</h3>
+      <h3>Ground Base Stations</h3>
       <p>
-        Servo-rotated antenna, environmental sensors, emergency beacon functionality.
+        Fixed or semi-mobile stations that provide emergency beacons, sensor data,
+        and communication access points for astronauts and rovers.
       </p>
     </div>
-    
+  </div>
+
+  <!-- PLACEHOLDER: SYSTEM BLOCK DIAGRAM -->
+  <div class="placeholder">
+    <p>[ Block Diagram of Overall System Architecture Goes Here ]</p>
   </div>
 </section>
 
@@ -89,56 +124,125 @@
 <section id="hardware" class="section dark">
   <h2>Hardware Design</h2>
 
+  <p>
+    The hardware is optimized for <strong>low power consumption</strong>,
+    <strong>modularity</strong>, and <strong>manufacturability</strong>.
+    Wherever possible, custom PCBs are used to reduce size, mass, and wiring complexity.
+  </p>
+
   <div class="cards">
     <div class="card">
-      <h3>CubeSat</h3>
+      <h3>CubeSat Hardware</h3>
       <ul>
-        <li>ESP8266 (Zigbee)</li>
-        <li>Custom PCBs</li>
-        <li>IMU + Magnetorquer</li>
-        <li>PCB Patch Antenna</li>
+        <li>ESP8266 microcontroller with Zigbee radio</li>
+        <li>Custom-designed power and communication PCBs</li>
+        <li>IMU-based attitude sensing</li>
+        <li>On-PCB magnetorquer for orientation control</li>
+        <li>PCB-integrated patch antenna</li>
       </ul>
+
+      <!-- PLACEHOLDER: CUBESAT CAD -->
+      <div class="placeholder">
+        <p>[ CubeSat CAD Model / Exploded View ]</p>
+      </div>
+
+      <!-- PLACEHOLDER: CUBESAT PCB -->
+      <div class="placeholder">
+        <p>[ CubeSat PCB Layout and Schematic ]</p>
+      </div>
     </div>
 
     <div class="card">
-      <h3>Base Station</h3>
+      <h3>Base Station Hardware</h3>
       <ul>
-        <li>ESP8266 (Zigbee)</li>
-        <li>2-Axis Servo Rotator</li>
-        <li>IR, Vibration, Light, Humidity Sensors</li>
+        <li>ESP8266 microcontroller with Zigbee</li>
+        <li>2-axis servo-driven directional antenna</li>
+        <li>IR, vibration, light, humidity sensors</li>
+        <li>Emergency beacon and alert system</li>
       </ul>
+
+      <!-- PLACEHOLDER: BASE STATION CAD -->
+      <div class="placeholder">
+        <p>[ Base Station CAD Model ]</p>
+      </div>
+
+      <!-- PLACEHOLDER: BASE STATION PCB -->
+      <div class="placeholder">
+        <p>[ Base Station PCB Layout and Schematic ]</p>
+      </div>
     </div>
+  </div>
+
+  <!-- PLACEHOLDER: POWER BUDGET / CoE -->
+  <div class="placeholder">
+    <p>[ Power Budget Calculations / CoE Space ]</p>
   </div>
 </section>
 
 <!-- SOFTWARE -->
 <section id="software" class="section">
   <h2>Software Stack</h2>
+
+  <p>
+    The software architecture is designed to be lightweight, fault-tolerant,
+    and adaptable. Firmware is split between CubeSat nodes and ground stations,
+    with shared communication protocols.
+  </p>
+
   <div class="cards">
-    <div class="card">Dual ESP8266 Firmware (CubeSat + Base Station)</div>
-    <div class="card">Real-Time Wi-Fi Sensor Dashboard</div>
-    <div class="card">Blynk Servo Controller App</div>
-    <div class="card">Automatic alignment system with custom motor river for magnetorquer</div>
+    <div class="card">
+      Dual ESP8266 firmware supporting Zigbee mesh routing,
+      node discovery, and fault recovery.
+    </div>
+    <div class="card">
+      Real-time Wi-Fi dashboard for sensor monitoring,
+      node health, and system diagnostics.
+    </div>
+    <div class="card">
+      Blynk-based remote control interface for antenna
+      alignment and emergency overrides.
+    </div>
+    <div class="card">
+      Automatic orientation and alignment logic using IMU feedback
+      and custom magnetorquer motor drivers.
+    </div>
+  </div>
+
+  <!-- PLACEHOLDER: SOFTWARE FLOWCHART -->
+  <div class="placeholder">
+    <p>[ Firmware Flowchart / Communication Protocol Flow ]</p>
   </div>
 </section>
 
 <!-- IMPACT -->
 <section id="impact" class="section dark">
   <h2>Impact & Vision</h2>
+
   <p>
-    This system supports <strong>emergency response</strong>,
-    <strong>resource coordination</strong>, and even
-    <strong>human connection and morale</strong> on Mars —
-    forming a foundational communication layer for sustainable 
-    extraterrestrial settlements.
+    The Mars Communication Mesh enables <strong>reliable emergency response</strong>,
+    <strong>resource coordination</strong>, and continuous connectivity between
+    humans and machines. Beyond technical utility, the system supports
+    <strong>human morale and safety</strong> by ensuring astronauts are never
+    completely isolated.
   </p>
+
+  <p>
+    In the long term, this mesh network can serve as a foundational layer for
+    Martian settlements, expanding organically as new nodes are deployed,
+    ultimately forming a resilient planetary communication backbone.
+  </p>
+
+  <!-- PLACEHOLDER: FUTURE EXPANSION DIAGRAM -->
+  <div class="placeholder">
+    <p>[ Future Expansion / Settlement Scale Diagram ]</p>
+  </div>
 </section>
 
 <footer>
-  <p>Hardware Hackathon 2.0 • Team 18 • Mars Communication Mesh
-<br>
-Yog • Shreyas • Vatsal • Sreekar
-</p>
+  <p>
+    Hardware Hackathon 2.0 • Team 18 • Mars Communication Mesh<br>
+    Yog • Shreyas • Vatsal • Sreekar
+  </p>
 </footer>
 
 <script src="script.js"></script>
