@@ -94,7 +94,7 @@
       <h3>1U CubeSat Node</h3>
       <p>
         Acts as an orbital or elevated relay node. Each CubeSat carries an
-        ESP8266-based controller, Zigbee radio, and attitude control hardware
+        ESPc3-based controller, telemetry radio, and attitude control hardware
         for antenna alignment and mesh optimization.
       </p>
     </div>
@@ -102,7 +102,7 @@
     <div class="timeline-item">
       <h3>Wireless Mesh Layer</h3>
       <p>
-        A Zigbee-based mesh network enables multi-hop routing, allowing data to
+        A wireless mesh network enables multi-hop routing, allowing data to
         dynamically reroute around failed or obstructed nodes without human intervention.
       </p>
     </div>
@@ -177,7 +177,7 @@
     <img src="images/sat.jpeg" alt="CubeSat PCB Layout">
     <p class="caption">
       Figure 6: Two-dimensional PCB layout of the CubeSat electronics showing
-      integrated ESP8266, Zigbee radio module, IMU, and power regulation circuitry.
+      integrated ESPc3, IMU, and power regulation circuitry, as well as the driver for the magnetorquer. 
     </p>
   </div>
 
@@ -185,7 +185,7 @@
     <img src="images/base.jpeg" alt="Base Station PCB Layout">
     <p class="caption">
       Figure 7: PCB layout of the base station electronics supporting sensor
-      interfaces, servo motor drivers, and emergency beacon circuitry.
+      interfaces, servo control and emergency beacon circuitry.
     </p>
   </div>
 
@@ -211,8 +211,7 @@
   <div class="infographic">
     <img src="images/antenna.jpeg" alt="Base Station PCB 3D Render">
     <p class="caption">
-      Figure 9: 3D render of the base station PCB highlighting servo driver
-      circuitry, sensor connectors, and power distribution architecture.
+      Figure 9: 3D render of the base station PCB highlighting sensor connectors, servo pins and power distribution architecture.
     </p>
   </div>
 
@@ -252,7 +251,7 @@
   <div class="infographic">
     <img src="images/patch.jpeg" alt="PCB Integrated Patch Antenna">
     <p class="caption">
-      Figure 11: PCB-integrated microstrip patch antenna designed for the Zigbee
+      Figure 11: PCB-integrated microstrip patch antenna designed for the uhf
       communication band, showing radiating patch geometry and ground plane layout.
     </p>
   </div>
@@ -312,7 +311,7 @@
   </div>
 
   <p>
-    The calculated link margin confirms that the system maintains sufficient signal
+    The calculated link margin will confirm that the system maintains sufficient signal
     strength for reliable data transmission, even with conservative assumptions
     for distance and environmental losses.
   </p>
@@ -326,7 +325,7 @@
   </p>
 
   <pre><code>
-nealinkb.mlx:
+    (Matlab Code)
 clc; clearvars;
 
 f = 433e6; % frequency in Hertz
@@ -446,7 +445,7 @@ LINKMARGINP_via_ebno = EbNo_calculated-EbNo_threshold
   </p>
 
   <pre class="code-block"><code>
-// MQTT Telemetry Publisher (ESP8266)
+// MQTT Telemetry Publisher (ESPc6)
 void publishTelemetry() {
   StaticJsonDocument<256> data;
   data["temp"]  = temperature;
