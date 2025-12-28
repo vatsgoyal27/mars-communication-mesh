@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MARS MISSION CONTROL - FINAL UPLINK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap");
+
+      :root {
+        --mars-red: #ff3e3e;
+        --comms-green: #00ff41;
+        --bg-dark: #0a0a0c;
+        --panel-bg: rgba(16, 16, 20, 0.8);
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--comms-green);
+        font-family: "JetBrains Mono", monospace;
+        background-image: linear-gradient(
+            rgba(0, 255, 65, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+        overflow: hidden;
+      }
+
+      .header-font {
+        font-family: "Orbitron", sans-serif;
+      }
+
+      .glass-panel {
+        background: var(--panel-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 255, 65, 0.2);
+        box-shadow: inset 0 0 15px rgba(0, 255, 65, 0.05);
+      }
+
+      .critical-glow {
+        animation: pulse-red 1.5s infinite;
+        border-color: var(--mars-red) !important;
+      }
+
+      @keyframes pulse-red {
+        0%,
+        100% {
+          box-shadow: 0 0 5px var(--mars-red);
+        }
+        50% {
+          box-shadow: 0 0 20px var(--mars-red);
+        }
+      }
+
+      .scanline {
+        width: 100%;
+        height: 2px;
+        background: rgba(0, 255, 65, 0.1);
+        position: absolute;
+        animation: scan 4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes scan {
+        from {
+          top: 0;
+        }
+        to {
+          top: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 lg:p-6">
+    <div class="scanline"></div>
+
+    <header
+      class="flex justify-between items-center mb-6 border-b border-green-900 pb-4"
+    >
+      <div>
+        <h1 class="header-font text-2xl font-black tracking-[0.2em] text-white">
+          MARS<span class="text-green-500">_UPLINK</span
+          ><span class="text-xs align-top ml-2 opacity-50">V 2.1.0</span>
+        </h1>
+        <div class="flex items-center gap-3 mt-1">
+          <div
+            id="status-dot"
+            class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"
+          ></div>
+          <span
+            id="status"
+            class="text-[10px] font-bold text-yellow-500 uppercase"
+            >Connecting...</span
+          >
+        </div>
+      </div>
+
+      <div
+        id="alarm-banner"
+        class="hidden glass-panel border-red-600 bg-red-950/30 px-6 py-2 flex items-center gap-3"
+      >
+        <span class="animate-ping h-2 w-2 rounded-full bg-red-500"></span>
+        <span class="header-font text-red-500 font-bold tracking-widest text-xs"
+          >CRITICAL: DUST STORM DETECTED</span
+        >
+      </div>
+    </header>
+
+    <main class="grid grid-cols-12 gap-4 h-[calc(100vh-140px)]">
+      <div class="col-span-12 lg:col-span-9 flex flex-col gap-4">
+        <div class="glass-panel p-4 rounded-sm flex-1 relative min-h-[350px]">
+          <h3
+            class="header-font text-[10px] font-bold text-green-400 tracking-widest mb-2 border-b border-green-900/30 pb-1"
+          >
+            CUBESAT_ORIENTATION (3D_IMU)
+          </h3>
+          <div id="imu-canvas-container" class="h-[calc(100%-30px)]"></div>
+          <div
+            class="absolute bottom-4 right-4 flex gap-6 text-[10px] opacity-70 bg-black/60 p-2 rounded font-mono"
+          >
+            <div>PITCH: <span id="val-pitch" class="text-white">0</span>°</div>
+            <div>ROLL: <span id="val-roll" class="text-white">0</span>°</div>
+            <div>YAW: <span id="val-yaw" class="text-white">0</span>°</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 h-[200px]">
+          <div class="glass-panel p-4 rounded-sm relative overflow-hidden">
+            <div class="flex justify-between items-center mb-2">
+              <h3
+                class="header-font text-[9px] font-bold text-red-400 tracking-wider uppercase"
+              >
+                Atmospheric Temp (°C)
+              </h3>
+              <span id="val-temp" class="text-lg font-bold text-white font-mono"
+                >--.-</span
+              >
+            </div>
+            <div class="h-[130px]"><canvas id="tempChart"></canvas></div>
+          </div>
+          <div class="glass-panel p-4 rounded-sm relative overflow-hidden">
+            <div class="flex justify-between items-center mb-2">
+              <h3
+                class="header-font text-[9px] font-bold text-yellow-400 tracking-wider uppercase"
+              >
+                Solar Lux (Lux)
+              </h3>
+              <span id="val-ldr" class="text-lg font-bold text-white font-mono"
+                >----</span
+              >
+            </div>
+            <div class="h-[130px]"><canvas id="lightChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-span-12 lg:col-span-3 flex flex-col gap-4">
+        <div
+          id="vibe-card"
+          class="glass-panel p-5 rounded-sm border-l-4 border-l-green-500"
+        >
+          <div class="text-[9px] opacity-50 uppercase tracking-widest mb-1">
+            Seismic Activity
+          </div>
+          <div id="vibe-val" class="header-font text-xl font-bold">STABLE</div>
+          <div
+            class="w-full bg-green-950 h-1 mt-3 rounded-full overflow-hidden"
+          >
+            <div
+              class="bg-green-500 h-full w-1/4 shadow-[0_0_10px_#00ff41]"
+            ></div>
+          </div>
+        </div>
+
+        <div
+          id="ir-card"
+          class="glass-panel p-5 rounded-sm border-l-4 border-l-blue-500"
+        >
+          <div class="text-[9px] opacity-50 uppercase tracking-widest mb-1">
+            Atmo. Clarity
+          </div>
+          <div id="ir-val" class="header-font text-xl font-bold">CLEAR</div>
+        </div>
+
+        <div
+          class="glass-panel flex-1 rounded-sm flex flex-col overflow-hidden"
+        >
+          <div
+            class="header-font text-[9px] font-bold p-3 border-b border-green-900/30 opacity-80"
+          >
+            >> CUBESAT_BEACON_LOG
+          </div>
+          <div
+            id="beacon-log"
+            class="text-[10px] p-3 leading-relaxed opacity-60 italic overflow-y-auto font-mono flex-1"
+          >
+            WAITING FOR DATA PACKETS...
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- THREE.JS INITIALIZATION ---
+      const container = document.getElementById("imu-canvas-container");
+      const scene = new THREE.Scene();
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      container.appendChild(renderer.domElement);
+
+      const light = new THREE.DirectionalLight(0xffffff, 1.5);
+      light.position.set(1, 1, 1).normalize();
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x404040, 2));
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(5, 3, 5);
+      camera.lookAt(0, 0, 0);
+
+      let cubesat;
+      const loader = new THREE.GLTFLoader();
+      loader.load("cubsat.glb", (gltf) => {
+        const model = gltf.scene;
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+
+        model.position.set(-center.x, -center.y, -center.z); // Geometry centering
+        const pivot = new THREE.Group();
+        scene.add(pivot);
+        pivot.add(model);
+        cubesat = pivot;
+
+        const maxDim = Math.max(size.x, size.y, size.z);
+        cubesat.scale.setScalar(3.5 / maxDim); // Auto-scaling, set accordingly
+      });
+
+      const rotationSpeed = 0.01;
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // If the model is loaded, apply a smooth continuous rotation
+        if (cubesat) {
+          // This makes it spin "round and round" on its Y-axis (up/down axis), default, when data is not loaded
+          cubesat.rotation.y += rotationSpeed;
+
+          // Optional: Add a slight tilt to make the orbit look more dynamic
+           cubesat.rotation.z += rotationSpeed * 0.5;
+        }
+
+        renderer.render(scene, camera); // Ensure camera and scene are defined
+      }
+      animate();
+
+      // --- CHART CONFIGURATION ---
+      const createChartConfig = (label, color, min, max) => ({
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              borderColor: color,
+              backgroundColor: color + "11",
+              data: [],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: true,
+              tension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { display: false },
+            y: {
+              min,
+              max,
+              grid: { color: "rgba(0, 255, 65, 0.05)" },
+              ticks: { color: "rgba(255,255,255,0.3)", font: { size: 9 } },
+            },
+          },
+          plugins: { legend: { display: false } },
+        },
+      });
+
+      const tempChart = new Chart(
+        document.getElementById("tempChart"),
+        createChartConfig("Temp", "#ff3e3e", -20, 50)
+      );
+      const lightChart = new Chart(
+        document.getElementById("lightChart"),
+        createChartConfig("Light", "#fbbf24", 0, 1024)
+      );
+
+      // --- MQTT LOGIC ---
+      const client = new Paho.MQTT.Client(
+        "192.168.0.34",
+        9001,
+        "mars_dash_" + Math.random()
+      );
+      let stormTimeout, tremorTimeout;
+
+      client.onMessageArrived = (message) => {
+        try {
+          const data = JSON.parse(message.payloadString);
+
+          if (data.pitch !== undefined && cubesat) {
+            cubesat.rotation.set(
+              THREE.MathUtils.degToRad(data.pitch),
+              THREE.MathUtils.degToRad(data.yaw || 0),
+              THREE.MathUtils.degToRad(data.roll)
+            );
+            document.getElementById("val-pitch").innerText = Math.round(
+              data.pitch
+            );
+            document.getElementById("val-roll").innerText = Math.round(
+              data.roll
+            );
+            document.getElementById("val-yaw").innerText = Math.round(
+              data.yaw || 0
+            );
+          }
+
+          if (data.temp !== undefined && data.light !== undefined) {
+            [tempChart, lightChart].forEach((c, i) => {
+              const val = i === 0 ? data.temp : data.light;
+              c.data.labels.push("");
+              c.data.datasets[0].data.push(val);
+              if (c.data.labels.length > 25) {
+                c.data.labels.shift();
+                c.data.datasets[0].data.shift();
+              }
+              c.update("none");
+            });
+            document.getElementById("val-temp").innerText =
+              data.temp.toFixed(1) + "°";
+            document.getElementById("val-ldr").innerText = data.light;
+          }
+
+          if (data.vib > 0) {
+            const vVal = document.getElementById("vibe-val"),
+              vCard = document.getElementById("vibe-card");
+            clearTimeout(tremorTimeout);
+            vVal.innerText = "TREMOR!";
+            vVal.classList.add("text-red-500", "animate-pulse");
+            vCard.classList.add("critical-glow");
+            tremorTimeout = setTimeout(() => {
+              vVal.innerText = "STABLE";
+              vVal.classList.remove("text-red-500", "animate-pulse");
+              vCard.classList.remove("critical-glow");
+            }, 3000);
+          }
+
+          if (data.dust_storm) {
+            const irVal = document.getElementById("ir-val"),
+              irCard = document.getElementById("ir-card"),
+              banner = document.getElementById("alarm-banner");
+            clearTimeout(stormTimeout);
+            irVal.innerText = "STORM";
+            irVal.classList.add("text-red-500");
+            irCard.classList.add("critical-glow");
+            banner.classList.remove("hidden");
+            document.getElementById("beacon-log").innerHTML =
+              `<div>[${new Date().toLocaleTimeString()}] ALERT: DUST_STORM</div>` +
+              document.getElementById("beacon-log").innerHTML;
+            stormTimeout = setTimeout(() => {
+              irVal.innerText = "CLEAR";
+              irVal.classList.remove("text-red-500");
+              irCard.classList.remove("critical-glow");
+              banner.classList.add("hidden");
+            }, 5000);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      client.connect({
+        onSuccess: () => {
+          document.getElementById("status").innerText = "UPLINK_ESTABLISHED";
+          document
+            .getElementById("status-dot")
+            .classList.replace("bg-yellow-500", "bg-green-500");
+          document
+            .getElementById("status")
+            .classList.replace("text-yellow-500", "text-green-500");
+          client.subscribe("mars/telemetry");
+        },
+      });
+
+      window.addEventListener("resize", () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+    </script>
+  </body>
+</html>

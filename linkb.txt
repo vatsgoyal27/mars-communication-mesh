@@ -1,0 +1,57 @@
+nealinkb.mlx:
+clc; clearvars;
+
+f = 433e6; % frequency in Hertz
+r = 450e3; %altitude (change later, based on elevation angle) in metres
+
+P_t = 15; % includes HPA, Power of the transmitter in dBw
+G_t = 2; % gain of the antenna, in dBi 
+L_txsystem = 0; %losses due to feeding lines, connectors, filters, HPA etc in dB
+L_fspl = 0; %free space path loss (calculation below) in dB
+L_atm = 0; %atmospheric, rain, clouds, fog, ionosphere attenuation + (Diffusion- due to obstacles- neglect) + (Multipath fading- only for terrestrial- neglect) in dB
+L_plrz = 0; %polarization mismatch, effectively 0 for circularly polarised antennas in dB
+L_point = 1.5; % pointing losses, add both reciever and transmitter pointing losses in dB
+
+G_r = 3; % gain of ground station in dBi
+G_lna_ext = 0; %gain of external lna, see below for effect on F in dBi
+L_rxsystem = 1; %losses due to feeding lines, connectors, filters, LNA, demodulators etc in dB
+
+S_datasheet = -135; %sensitivity on datasheet (already includes the internal LNA gain effect an noise spectrum density change) in dBm
+T_ant = 750; %Thermal temperature, Tsky(atmospheric thermal temp) + Tgnd(due to sie and back lobes) in K
+B_datasheet = 125e3; %Bandwidth of reciever in Hz
+SNRrequired_datasheet = -17.5; %required signal to noise ratio for the reciever to be able to demod the signal in dB
+
+U_bitrate = 980e-6; %bitrate that WE pass, megabits per second
+EbNo_threshold = 7.1; %minimum Eb/No required by the reciever, in dB
+
+EIRP = P_t + G_t - L_txsystem %effective output power in dBm
+L_fspl = 20*log10(4*pi*r*f/299792458)
+L_prop = L_fspl + L_atm %propogation losses
+
+Pr = EIRP - L_prop - L_plrz - L_point + G_r + G_lna_ext - L_rxsystem;
+C = Pr %recieved power to digital system at reciever end, in dBm
+
+N = S_datasheet - SNRrequired_datasheet %noise power
+NF = N + 174 - 10*log10(B_datasheet) %noise figure at datasheet
+F = 10^(NF/10) %noise factor at datasheet
+
+% if external lna connected - F = Flna + (Frx - 1)/G_lna_ext;
+
+Tr = (F-1)*290 %Thermal temp at reciever end
+Ts_actual = T_ant + Tr %Thermal temp of system incluing Tatm and Tr (entire system)
+Ts_spec = F*290 %Thermal temp use by mnufacturer to calculate
+correction = 10*log10(Ts_actual/Ts_spec) %change due to Tatm
+
+S_actual = S_datasheet + correction; %actual sensitivity of reciever system
+Psensitivity = S_actual
+
+LINKMARGINP_via_sensitivity = Pr-Psensitivity
+
+No = 1.380649e-23 * Ts_actual; %Noise spectral density in W/Hz
+No = 10*log10(No) %nsd in dBW/Hz
+
+C_ = C - 30; %C in dBW
+CNo = C_ - No %received carrier power/noise spectral density in dB-Hz
+EbNo_calculated = CNo - 10*log10(U_bitrate) -60 %received EbNo in dB
+
+LINKMARGINP_via_ebno = EbNo_calculated-EbNo_threshold
