@@ -20,12 +20,12 @@ A lethal **Information Gap plagues Mars exploration**. During catastrophic dust 
 * **Infrastructure Risk:** Deploying fixed infrastructure is slow and expensive; failures during emergencies can result in loss of life.
 * **Connectivity Gap:** There is currently no lightweight, rapidly deployable solution for inter-settlement connectivity.
 
-## 🗼 Our Solution: The Lighthouse, Hive, Scouts architecture
+## 🗼 Our Solution: The Lighthouse, Link, Hive architecture
 We have engineered a **Predictive Safety Hub** that transforms a stationary base into a "Lighthouse" for the Martian frontier. By focusing on infrastructure over simple robotics, we solve the backbone challenges of space exploration.
 
 ## 🏗️ System Architecture: Lighthouse, Link & the Hive
 1. **The Lighthouse** Remote patrol bases placed in the city periphery to detect a storm via **IR/LDR** sensors, gimbal skyward and "punches" an SOS through the dust to the **CubeSat**.
-2. **The Link:** The CubeSat aligns itself to the ground stations using the custom-built magnetorquer, and beams the SOS to the main city
+2. **The Link:** The CubeSat aligns itself to the ground stations (prevents tumbling using the custom-built magnetorquer), and beams the SOS to the main city
 3. **The Hive:** The main city, the SOS from the CubeSat allows residents to seal airlocks and retract solar panels before the storm arrives.
 
 ---
